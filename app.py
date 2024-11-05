@@ -10,6 +10,7 @@ import threading
 
 app = dash.Dash(__name__)
 
+
 def compute_tdoa_error(parameters, x1, y1, x2, y2, x3, y3, delta_t12, delta_t13, speed_of_light):
     x, y = parameters
     distance1 = np.sqrt((x - x1) ** 2 + (y - y1) ** 2)
@@ -140,27 +141,48 @@ def refresh_graph(n):
 )
 def adjust_speed(n_clicks, speed):
     if n_clicks is None or speed is None:
-        return "Enter speed and click 'Change Speed'."
+        return "Enter speed"
     try:
         speed = float(speed)
         response = change_object_speed(speed)
         return f"Object speed changed to: {response.get('objectSpeed', 'unknown')} km/h"
     except ValueError:
-        return "Enter a valid speed value."
+        return "Enter a valid speed value"
 
-app.layout = html.Div([
-    dcc.Graph(id='live-graph', animate=True),
-    dcc.Interval(
-        id='interval-component',
-        interval=1000, 
-        n_intervals=0
-    ),
-    html.Div([
-        dcc.Input(id='speed-input', type='number', placeholder='Enter speed (km/h)'),
-        html.Button('Change Speed', id='submit-speed', n_clicks=0),
-    ]),
-    html.Div(id='speed-response', style={'margin-top': '10px'})
-])
+app.layout = html.Div(
+    style={'fontFamily': 'Arial, sans-serif', 'padding': '20px', 'backgroundColor': '#f4f4f4'},
+    children=[
+        html.Div(
+            style={'textAlign': 'center', 'marginBottom': '20px'},
+            children=[
+                html.H1("TDOA Receiver Positioning", style={'color': '#333'}),
+            ]
+        ),
+        dcc.Graph(id='live-graph', animate=True, style={'height': '70vh'}),
+        dcc.Interval(id='interval-component', interval=1000, n_intervals=0),
+        html.Div(
+            style={'display': 'flex', 'justifyContent': 'center', 'marginTop': '20px'},
+            children=[
+                dcc.Input(
+                    id='speed-input',
+                    type='number',
+                    placeholder='Enter speed (km/h)',
+                    style={'marginRight': '10px', 'padding': '10px', 'borderRadius': '5px', 'border': '1px solid #ccc'}
+                ),
+                html.Button(
+                    'Change Speed',
+                    id='submit-speed',
+                    n_clicks=0,
+                    style={'padding': '10px 20px', 'borderRadius': '5px', 'backgroundColor': '#007BFF', 'color': '#fff', 'border': 'none'}
+                ),
+            ]
+        ),
+        html.Div(
+            id='speed-response',
+            style={'marginTop': '10px', 'textAlign': 'center', 'color': '#333', 'fontSize': '18px'}
+        )
+    ]
+)
 
 def start_websocket_thread():
     asyncio.run(websocket_listener())
